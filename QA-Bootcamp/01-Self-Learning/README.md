@@ -34,3 +34,4 @@ Dokumen lengkap dapat dilihat pada file:
   - Web_Technology_for_QA.pdf
   - Tugas_2_Bootcamp_Sakti_Ahmad Syahril.xlsx
   - Membangun Fondasi QA Engineer.pdf
+  - Test Bug Report.xlsx

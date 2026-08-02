@@ -30,3 +30,7 @@ Mempelajari konsep dasar Quality Assurance sebagai bekal memahami proses penguji
 Dokumen lengkap dapat dilihat pada file:
 
   - Self-Learning-QA.pdf
+  - Web_Technology_for_QA.pdf
+  - Web_Technology_for_QA.pdf
+  - Tugas_2_Bootcamp_Sakti_Ahmad Syahril.xlsx
+  - Membangun Fondasi QA Engineer.pdf

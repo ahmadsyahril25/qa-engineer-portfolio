@@ -1,0 +1,242 @@
+step awal playwright
+CTRL+`
+1. npm init -y
+2. npm install -D @playwright/test
+3. npx playwright install
+4. buat file di folder isibebas.spec.js
+5. buat file playwright.config.js
+
+import { test, expect } from '@playwright/test';
+
+// Test login dengan data valid
+test('login valid', async ({ page }) => {
+
+  // Buka halaman login
+  await page.goto('https://www.saucedemo.com/');
+
+  // Input username
+  await page.fill('#user-name', 'standard_user');
+
+  // Input password
+  await page.fill('#password', 'secret_sauce');
+
+  // Klik tombol login
+  await page.click('#login-button');
+
+  // Validasi berhasil login (URL berubah)
+  await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
+
+  // Validasi text Products muncul
+  await expect(page.locator('.title')).toHaveText('Products');
+
+});
+
+login gagal 
+// Test login gagal tanpa input
+test('login gagal tanpa input', async ({ page }) => {
+
+  // Buka halaman login
+  await page.goto('https://www.saucedemo.com/');
+
+  // Klik login tanpa isi apapun
+  await page.click('#login-button');
+
+  // Validasi error muncul
+  await expect(page.locator('[data-test="error"]')).toBeVisible();
+
+});
+
+
+kalo di rapihin 
+QA_Automation/
+  tests/
+    login.spec.js
+  pages/
+    loginPage.js
+    inventoryPage.js
+  playwright.config.js
+  package.jso
+
+untuk login.js
+// Class untuk handle semua element & action di halaman login
+export class LoginPage {
+  constructor(page) {
+    this.page = page;
+
+    // Locator disimpan di satu tempat (biar gampang maintenance)
+    this.usernameInput = '#user-name';
+    this.passwordInput = '#password';
+    this.loginButton = '#login-button';
+    this.errorMessage = '[data-test="error"]';
+  }
+
+  // Method untuk buka halaman login
+  async goto() {
+    await this.page.goto('https://www.saucedemo.com/');
+  }
+
+  // Method login reusable
+  async login(username, password) {
+    await this.page.fill(this.usernameInput, username);
+    await this.page.fill(this.passwordInput, password);
+    await this.page.click(this.loginButton);
+  }
+
+  // Method untuk ambil error message
+  async getErrorMessage() {
+    return this.page.locator(this.errorMessage);
+  }
+}
+
+untuk inventory
+export class InventoryPage {
+  constructor(page) {
+    this.page = page;
+
+    this.pageTitle = '.title';
+    this.addToCartButton = '#add-to-cart-sauce-labs-backpack';
+    this.cartIcon = '.shopping_cart_link';
+  }
+
+  // Validasi halaman inventory kebuka
+  async isLoaded() {
+    await this.page.waitForSelector(this.pageTitle);
+  }
+
+  // Tambah produk ke cart
+  async addItemToCart() {
+    await this.page.click(this.addToCartButton);
+  }
+
+  // Klik icon cart
+  async goToCart() {
+    await this.page.click(this.cartIcon);
+  }
+
+  // Ambil title page
+  async getTitleText() {
+    return this.page.locator(this.pageTitle);
+  }
+}
+
+untuk cart page 
+export class CartPage {
+  constructor(page) {
+    this.page = page;
+
+    this.cartItem = '.inventory_item_name';
+    this.checkoutButton = '#checkout';
+  }
+
+  // Validasi item ada di cart
+  async getCartItem() {
+    return this.page.locator(this.cartItem);
+  }
+
+  // Klik checkout
+  async clickCheckout() {
+    await this.page.click(this.checkoutButton);
+  }
+}
+
+untuk checkout page
+export class CheckoutPage {
+  constructor(page) {
+    this.page = page;
+
+    this.firstName = '#first-name';
+    this.lastName = '#last-name';
+    this.postalCode = '#postal-code';
+    this.continueButton = '#continue';
+    this.finishButton = '#finish';
+    this.successMessage = '.complete-header';
+  }
+
+  // Isi data checkout
+  async fillInformation(first, last, zip) {
+    await this.page.fill(this.firstName, first);
+    await this.page.fill(this.lastName, last);
+    await this.page.fill(this.postalCode, zip);
+  }
+
+  // Klik continue
+  async clickContinue() {
+    await this.page.click(this.continueButton);
+  }
+
+  // Klik finish
+  async clickFinish() {
+    await this.page.click(this.finishButton);
+  }
+
+  // Ambil pesan sukses
+  async getSuccessMessage() {
+    return this.page.locator(this.successMessage);
+  }
+}
+
+untuk checkout.spec.js
+import { test, expect } from '@playwright/test';
+import { LoginPage } from '../pages/loginPage.js';
+import { InventoryPage } from '../pages/inventoryPage.js';
+import { CartPage } from '../pages/cartPage.js';
+import { CheckoutPage } from '../pages/checkoutPage.js';
+
+test('End-to-End: Add to Cart & Checkout', async ({ page }) => {
+
+  const loginPage = new LoginPage(page);
+  const inventoryPage = new InventoryPage(page);
+  const cartPage = new CartPage(page);
+  const checkoutPage = new CheckoutPage(page);
+
+  // Step 1: Login
+  await loginPage.goto();
+  await loginPage.login('standard_user', 'secret_sauce');
+
+  // Step 2: Validasi masuk inventory
+  await inventoryPage.isLoaded();
+
+  // Step 3: Add item ke cart
+  await inventoryPage.addItemToCart();
+
+  // Step 4: Masuk ke cart
+  await inventoryPage.goToCart();
+
+  // Step 5: Validasi item ada
+  await expect(await cartPage.getCartItem()).toBeVisible();
+
+  // Step 6: Checkout
+  await cartPage.clickCheckout();
+
+  // Step 7: Isi data
+  await checkoutPage.fillInformation('Ahmad', 'Syahril', '12345');
+
+  // Step 8: Continue
+  await checkoutPage.clickContinue();
+
+  // Step 9: Finish order
+  await checkoutPage.clickFinish();
+
+  // Step 10: Validasi sukses
+  await expect(await checkoutPage.getSuccessMessage())
+    .toHaveText('Thank you for your order!');
+
+});
+}
+
+
+Siap, sudah aku simpan 👍
+
+Nanti kamu tinggal bilang aja:
+👉 “lanjut QA Playwright”
+
+Aku bakal langsung lanjut dari:
+
+fixing E2E (workers & stability)
+rapihin project
+siapin buat GitHub + CV
+
+0858 8480 5990 (call center lamaran) 
+
+- Playwright (Learning)
+- Chrome DevToolshttps://drive.google.com/file/d/1XH_6FatThrXu-qwirWN4S80z1AiUXBWv/view?usp=sharing

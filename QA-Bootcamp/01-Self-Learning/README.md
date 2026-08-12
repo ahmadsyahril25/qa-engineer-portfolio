@@ -35,3 +35,4 @@ Dokumen lengkap dapat dilihat pada file:
   - Tugas_2_Bootcamp_Sakti_Ahmad Syahril.xlsx
   - Membangun Fondasi QA Engineer.pdf
   - Test Bug Report.xlsx
+  - Self_Learning_Ahmad Syahril_Cypress & Playwright.pdf
